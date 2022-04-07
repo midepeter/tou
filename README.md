@@ -31,3 +31,9 @@ Basic Workflow
 
 The halfthing for this project is just for a (work queue manager sending emails) 
 Enqueue the job to send email 
+
+
+// Hack more to on the code 
+// Implement a lampse
+
+//I do not need a websocket connection is the normal request should be done

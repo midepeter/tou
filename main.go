@@ -3,16 +3,20 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
+
+	"go.uber.org/zap"
 )
 
 //get jobs (I can expose this as an endpoint with a post method Where you can get jobs)
 //I enqueue the jobs
 //A worker is set to always search for the job and executes them
+var log *zap.Logger
+
+func init() {
+	log, _ = initLogger()
+}
 
 func main() {
 	mux := http.NewServeMux()
@@ -25,7 +29,7 @@ func main() {
 	}
 
 	if err := srv.ListenAndServe(); err != nil {
-		log.Println(err)
+		log.Info("Error server interupted")
 	}
 }
 
@@ -38,10 +42,9 @@ type Job struct {
 
 func getJobs(w http.ResponseWriter, r *http.Request) {
 	var (
-		err    error
-		job    Job
-		writer io.Writer
-		q      queue
+		err error
+		job Job
+		q   queue
 	)
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusForbidden)
@@ -55,12 +58,10 @@ func getJobs(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(body, &job)
 	if err != nil {
-		log.Fatalln(err)
+		log.Info("Error Unmarshalling struct")
 	}
 
-	writer = os.Stdout
 	q.Enqueue(job)
-	fmt.Fprintf(writer, "The jobs are %s", job)
 }
 
 type queue struct{}
@@ -78,7 +79,7 @@ func (q queue) Enqueue(job Job) error {
 	}
 
 	Jobqueue = append(Jobqueue, job)
-	fmt.Println("The queue actually", Jobqueue)
+	log.Info("One job received")
 	return nil
 }
 
@@ -99,15 +100,21 @@ func (q queue) Dequeue(job Job) (*[]Job, error) {
 	return &newJobqueue, nil
 }
 
+type Worker interface {
+	work(j *Job) error
+}
+
+//interfaces are only needed when two or more concrete types that must be dealt with in a uniform way
+//Interface is a good way to decouple two packages
 //The worker checks into the queue to see if there are availabe jobs to excute- It should be checking at 2 minutes intervals
 type worker struct{}
 
-func (w worker) Worker(job Job) (string, error) {
-	result := fmt.Sprintf(
+func (w worker) Work(job Job) error {
+	_ = fmt.Sprintf(
 		`From: %v
 		To: %v
 		Body: %v`,
 		job.From, job.To, job.Body,
 	)
-	return result, nil
+	return nil
 }
