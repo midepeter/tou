@@ -13,7 +13,7 @@ func initLogger() (*zap.Logger, error) {
 	rawJSON := []byte(`{
 		"level": "debug",
 		"encoding": "json",
-		"outputPaths": ["stdout", "/tmp/logs"],
+		"outputPaths": ["stdout"],
 		"errorOutputPaths": ["stderr"],
 		"encoderConfig": {
 			"messageKey": "message",
