@@ -7,5 +7,6 @@ tou is a lightweight job queue manager. A web serve can enqueue a job and wait f
     - Scaling worker process by spunning more go routines 
     - Easy to use in a distributed system
 ### Installation ###
-Run ** go run . **
+Run 
+**go run .**
 
