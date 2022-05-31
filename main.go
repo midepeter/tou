@@ -1,120 +1,18 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"net/http"
+	"os"
+	"workqueue/cmd"
 
 	"go.uber.org/zap"
 )
 
-//get jobs (I can expose this as an endpoint with a post method Where you can get jobs)
-//I enqueue the jobs
-//A worker is set to always search for the job and executes them
 var log *zap.Logger
 
-func init() {
-	log, _ = initLogger()
-}
-
 func main() {
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("/jobs", getJobs)
-
-	srv := &http.Server{
-		Addr:    "localhost:8080",
-		Handler: mux,
-	}
-
-	if err := srv.ListenAndServe(); err != nil {
-		log.Info("Error server interupted")
-	}
-}
-
-type Job struct {
-	ID   string
-	From string
-	To   string
-	Body string
-}
-
-func getJobs(w http.ResponseWriter, r *http.Request) {
-	var (
-		err error
-		job Job
-		q   queue
-	)
-	if r.Method != "POST" {
-		w.WriteHeader(http.StatusForbidden)
-		w.Write([]byte("Invalid method"))
-	}
-
-	body, err := ioutil.ReadAll(r.Body)
+	err := cmd.Run()
 	if err != nil {
-		w.Write([]byte("No available jobs"))
+		log.Error("App failed")
+		os.Exit(1)
 	}
-
-	err = json.Unmarshal(body, &job)
-	if err != nil {
-		log.Info("Error Unmarshalling struct")
-	}
-
-	q.Enqueue(job)
-}
-
-type queue struct{}
-
-var (
-	Jobqueue = make([]Job, 5)
-)
-
-//Enqueue should return always a nil error
-func (q queue) Enqueue(job Job) error {
-	var err error
-
-	if job.ID == " " {
-		panic(fmt.Sprintf("Job cannot be empty %s", err))
-	}
-
-	Jobqueue = append(Jobqueue, job)
-	log.Info("One job received")
-	return nil
-}
-
-func (q queue) Dequeue(job Job) (*[]Job, error) {
-	var (
-		err         error
-		newJobqueue []Job
-	)
-
-	for k, v := range Jobqueue {
-		if v.ID == job.ID {
-			newJobqueue = append(newJobqueue, Jobqueue[:k]...)
-			newJobqueue = append(newJobqueue, Jobqueue[k+1:]...)
-		} else {
-			return nil, err
-		}
-	}
-	return &newJobqueue, nil
-}
-
-type Worker interface {
-	work(j *Job) error
-}
-
-//interfaces are only needed when two or more concrete types that must be dealt with in a uniform way
-//Interface is a good way to decouple two packages
-//The worker checks into the queue to see if there are availabe jobs to excute- It should be checking at 2 minutes intervals
-type worker struct{}
-
-func (w worker) Work(job Job) error {
-	_ = fmt.Sprintf(
-		`From: %v
-		To: %v
-		Body: %v`,
-		job.From, job.To, job.Body,
-	)
-	return nil
 }
