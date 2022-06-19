@@ -1,19 +1,31 @@
 package server
 
 import (
+	"context"
+	"log"
 	"net/http"
 )
 
 type Server struct {
-	srv *http.Server
-	
+	srv *http.Server	
 	errChan chan error 
+	done chan bool
+}
+
+func NewServer() *Server {
+	srv := &http.Server{}
+	return &Server{
+		errChan: make(chan error),
+		done: make(chan bool),
+		srv: srv,
+	}
 }
 
 func (s *Server) Serve(addr string) error {
 	s.srv.Addr = addr 
 	s.srv.Handler = http.DefaultServeMux
 
+	log.Println("Serving work queue server to on the addr: ", addr)
 	s.errChan <- s.srv.ListenAndServe()
 
 	return <- s.errChan
@@ -29,6 +41,13 @@ func (s *Server) ServerWithTLS(addr, certFile, keyFile string) error {
 	return <- s.errChan
 }
 
-func (s *Server) Shutdown() error {
-	return nil
+func (s *Server) Shutdown(ctx context.Context) error {
+	go func() {
+		s.done <- true
+		if err := s.srv.Shutdown(ctx); err != nil {
+			s.errChan <- err
+		}
+	}()
+	<- s.done
+	return <- s.errChan
 }
