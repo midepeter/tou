@@ -18,6 +18,7 @@ func Run() *cli.App {
 	app.Commands = []*cli.Command{
 		VersionCmd,
 		StartCmd,
+		ConnectCmd,
 	}
 
 	return app
