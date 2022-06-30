@@ -1,0 +1,72 @@
+package tou
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"io/ioutil"
+	"log"
+	"net/http"
+
+	"github.com/urfave/cli/v2"
+)
+
+var (
+	data string
+	port string
+)
+
+// type msgContent struct {
+// 	Id    string `json:"id"`
+// 	Value string `json:"value"`
+// }
+
+var AddCmd = &cli.Command{
+	Name:  "add",
+	Usage: "The add command is used for adding to the running workqueue",
+	Action: func(c *cli.Context) error {
+		if port != " " || data != " " {
+			body, err := json.Marshal(data)
+			if err != nil {
+				return errors.New("Unable to marshal result")
+			}
+
+			postBytes := bytes.NewBuffer(body)
+
+			req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, "http://127.0.0.1:"+port+"/add", postBytes)
+			c := &http.Client{}
+
+			resp, err := c.Do(req)
+			if err != nil {
+				return errors.New("Unable to make new request")
+			}
+
+			respBody, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return errors.New("Unable to read response body")
+			}
+
+			log.Println("The response", string(respBody))
+			return nil
+		}
+		return errors.New("No value was inserted")
+	},
+
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:        "data",
+			Usage:       "to specify port on which work queue server instance is to run",
+			Aliases:     []string{"d"},
+			Required:    true,
+			Destination: &data,
+		},
+		&cli.StringFlag{
+			Name:        "port",
+			Usage:       "to specify port on which work queue server instance is to run",
+			Aliases:     []string{"p"},
+			Required:    true,
+			Destination: &port,
+		},
+	},
+}
