@@ -17,11 +17,6 @@ var (
 	port string
 )
 
-// type msgContent struct {
-// 	Id    string `json:"id"`
-// 	Value string `json:"value"`
-// }
-
 var AddCmd = &cli.Command{
 	Name:  "add",
 	Usage: "The add command is used for adding to the running workqueue",
@@ -52,21 +47,22 @@ var AddCmd = &cli.Command{
 		}
 		return errors.New("No value was inserted")
 	},
+	Flags: flags,
+}
 
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:        "data",
-			Usage:       "to specify port on which work queue server instance is to run",
-			Aliases:     []string{"d"},
-			Required:    true,
-			Destination: &data,
-		},
-		&cli.StringFlag{
-			Name:        "port",
-			Usage:       "to specify port on which work queue server instance is to run",
-			Aliases:     []string{"p"},
-			Required:    true,
-			Destination: &port,
-		},
+var flags = []cli.Flag{
+	&cli.StringFlag{
+		Name:        "data",
+		Usage:       "to specify port on which work queue server instance is to run",
+		Aliases:     []string{"d"},
+		Required:    true,
+		Destination: &data,
+	},
+	&cli.StringFlag{
+		Name:        "port",
+		Usage:       "to specify port on which work queue server instance is to run",
+		Aliases:     []string{"p"},
+		Required:    true,
+		Destination: &port,
 	},
 }

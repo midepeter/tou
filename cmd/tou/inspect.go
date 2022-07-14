@@ -1,14 +1,12 @@
 package tou
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
+	"io/ioutil"
 
 	"github.com/urfave/cli/v2"
 )
@@ -22,30 +20,7 @@ var InspectCmd = &cli.Command{
 	Name:  "inspect",
 	Usage: "to start the workqueue manager on a server",
 	Action: func(ctx *cli.Context) error {
-		//fmt.Fprintf(os.Stdout, "The id is %s", id)
-
-		postBody, err := json.Marshal(id)
-		if err != nil {
-			return nil
-		}
-
-		postBytes := bytes.NewBuffer(postBody)
-
-		req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, "http://127.0.0.1:"+inspectPort+"/inspect", postBytes)
-		c := &http.Client{}
-
-		resp, err := c.Do(req)
-		if err != nil {
-			return errors.New("Unable to make new request")
-		}
-
-		respBody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return errors.New("Unable to read response body")
-		}
-
-		fmt.Fprintf(os.Stdout, "%s passed a valid data \n", string(respBody))
-		return nil
+		return Inspect()
 	},
 
 	Flags: []cli.Flag{
@@ -63,4 +38,24 @@ var InspectCmd = &cli.Command{
 			Destination: &inspectPort,
 		},
 	},
+}
+
+func Inspect() error {
+	url := "http://127.0.0.1:" + inspectPort + "/inspect"
+
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, url, nil)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Unable to make request to url %s ", url))
+	}
+
+	c := &http.Client{}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		return errors.New(fmt.Sprintf("Unable to make request to url %s", url))
+	}
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Fprintf(os.Stdout, "%s he data was valid\n", string(body))
+	return nil
 }
