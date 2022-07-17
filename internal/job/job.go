@@ -9,7 +9,7 @@ import (
 type Job struct {
 	Id      string    `json:"id"`
 	Payload string    `json:"payload"`
-	TTL     time.Time //TTL determines the duration a particular job can live for before it expires
+	TTL     time.Time `json:"ttl"`//TTL determines the duration a particular job can live for before it expires
 }
 
 func (j Job) Validate() error {

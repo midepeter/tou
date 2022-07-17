@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 
+	log "github.com/rs/zerolog/log"
+
+	"github.com/midepeter/tou/internal/job"
 	"github.com/midepeter/tou/internal/queue"
 )
 
@@ -18,21 +21,21 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	// var newJob job.Job
-	// err = json.Unmarshal(body, &newJob)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// }
+	var newJob job.Job
+	err = json.Unmarshal(body, &newJob)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
 
-	// if err := newJob.Validate(); err != nil {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// }
+	if err := newJob.Validate(); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+	}
 
-	if err := h.Queue.Insert(string(body)); err != nil {
+	if err := h.Queue.Insert(newJob); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
 	w.Write(body)
 
-	log.Printf("Added data %s", string(body))
+	log.Info().Msgf("Adding a new job %#v", newJob)
 }

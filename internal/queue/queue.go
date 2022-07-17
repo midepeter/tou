@@ -19,7 +19,7 @@ type Store interface {
 
 type Queue struct {
 	id       string
-	elem     []string//
+	elem     []job.Job//
 	size     uint64    //Size signifies the size of jobs each queue can take
 	shutdown bool
 }
@@ -28,11 +28,11 @@ func NewQueue(id string) *Queue {
 	return &Queue{
 		id:   id,
 		size: 10,
-		elem: make([]string, 0),
+		elem: make([]job.Job, 0),
 	}
 }
 
-func (q *Queue) Get() string {
+func (q *Queue) Get() job.Job {
 
 	job := q.elem[len(q.elem)-1]
 
@@ -43,7 +43,7 @@ func (q *Queue) Get() string {
 	return job
 }
 
-func (q *Queue) Insert(t string) error {
+func (q *Queue) Insert(t job.Job) error {
 
 	if len(q.elem) > int(q.size) {
 		return fmt.Errorf("Unable to add job to queue")
