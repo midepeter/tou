@@ -1,13 +1,12 @@
 package tou
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/urfave/cli/v2"
 )
@@ -21,7 +20,7 @@ var AddCmd = &cli.Command{
 	Name:  "add",
 	Usage: "The add command is used for adding to the running workqueue",
 	Action: func(c *cli.Context) error {
-		return Add(c, data) 
+		return Add(c, data)
 	},
 	Flags: flags,
 }
@@ -48,14 +47,7 @@ func Add(ctx *cli.Context, job string) error {
 		return errors.New("Job is empty: Operation invalid")
 	}
 
-	body, err := json.Marshal(job)
-	if err != nil {
-		return errors.New("Unable to marshal result")
-	}
-
-	postBytes := bytes.NewBuffer(body)
-
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, "http://127.0.0.1:"+port+"/add", postBytes)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, "http://127.0.0.1:"+port+"/add", strings.NewReader(job))
 	c := &http.Client{}
 
 	resp, err := c.Do(req)
@@ -69,6 +61,6 @@ func Add(ctx *cli.Context, job string) error {
 	}
 
 	log.Println("The response", string(respBody))
-	
+
 	return nil
 }

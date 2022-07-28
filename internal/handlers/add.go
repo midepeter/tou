@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-
-	log "github.com/rs/zerolog/log"
+	"log"
 
 	"github.com/midepeter/tou/internal/job"
 	"github.com/midepeter/tou/internal/queue"
@@ -37,5 +36,5 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(body)
 
-	log.Info().Msgf("Adding a new job %#v", newJob)
+	log.Println("Adding a new job %#v", newJob)
 }

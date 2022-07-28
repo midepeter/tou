@@ -2,9 +2,8 @@ package server
 
 import (
 	"context"
+	"log"
 	"net/http"
-
-	"github.com/rs/zerolog/log"
 
 	"github.com/midepeter/tou/internal/handlers"
 )
@@ -34,7 +33,7 @@ func (s *Server) Serve(addr string) error {
 
 	http.HandleFunc("/inspect", s.handler.Inspect)
 
-	log.Info().Msgf("Serving work queue server to on the addr ", addr)
+	log.Println("Serving work queue server to on the addr ", addr)
 	s.errChan <- s.srv.ListenAndServe()
 
 	return <-s.errChan
