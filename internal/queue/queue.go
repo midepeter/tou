@@ -2,6 +2,7 @@ package queue
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/midepeter/tou/internal/job"
 )
@@ -18,8 +19,9 @@ type Store interface {
 }
 
 type Queue struct {
+	mu       sync.Mutex
 	id       string
-	elem     []job.Job//
+	elem     []job.Job //
 	size     uint64    //Size signifies the size of jobs each queue can take
 	shutdown bool
 }
@@ -33,7 +35,8 @@ func NewQueue(id string) *Queue {
 }
 
 func (q *Queue) Get() job.Job {
-
+	q.mu.Lock()
+	defer q.mu.Unlock()
 	job := q.elem[len(q.elem)-1]
 
 	if len(q.elem) > 0 {
@@ -44,7 +47,8 @@ func (q *Queue) Get() job.Job {
 }
 
 func (q *Queue) Insert(t job.Job) error {
-
+	q.mu.Lock()
+	defer q.mu.Unlock()
 	if len(q.elem) > int(q.size) {
 		return fmt.Errorf("Unable to add job to queue")
 	}
