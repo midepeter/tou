@@ -5,6 +5,7 @@ import (
 
 	"github.com/midepeter/tou/internal/handlers"
 	"github.com/midepeter/tou/internal/queue"
+	"github.com/midepeter/tou/logger"
 	"github.com/midepeter/tou/server"
 )
 
@@ -14,11 +15,17 @@ var StartCmd = &cli.Command{
 	Action: func(c *cli.Context) error {
 		newQueue := queue.NewQueue("first-queue")
 
-		h := handlers.Handler{
-			Queue: newQueue,
+		logger, err := logger.SetUpLogger()
+		if err != nil {
+			panic(err)
 		}
 
-		s := server.NewServer(h)
+		h := handlers.Handler{
+			Queue: newQueue,
+			Log:   logger,
+		}
+
+		s := server.NewServer(h, logger)
 		return s.Serve("localhost:9000")
 	},
 }

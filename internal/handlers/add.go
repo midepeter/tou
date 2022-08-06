@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"log"
 
 	"github.com/midepeter/tou/internal/job"
 	"github.com/midepeter/tou/internal/queue"
+	"go.uber.org/zap"
 )
 
 type Handler struct {
 	Queue *queue.Queue
+	Log   *zap.SugaredLogger
 }
 
 func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
@@ -36,5 +37,5 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(body)
 
-	log.Println("Adding a new job %#v", newJob)
+	h.Log.Info("Adding a new job %#v", newJob)
 }

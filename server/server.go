@@ -2,25 +2,27 @@ package server
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/midepeter/tou/internal/handlers"
+	"go.uber.org/zap"
 )
 
 type Server struct {
 	srv     *http.Server
 	errChan chan error
 	done    chan bool
+	log     *zap.SugaredLogger
 	handler *handlers.Handler
 }
 
-func NewServer(h handlers.Handler) *Server {
+func NewServer(h handlers.Handler, logger *zap.SugaredLogger) *Server {
 	srv := &http.Server{}
 	return &Server{
 		errChan: make(chan error),
 		done:    make(chan bool),
 		srv:     srv,
+		log:     logger,
 		handler: &h,
 	}
 }
@@ -33,7 +35,7 @@ func (s *Server) Serve(addr string) error {
 
 	http.HandleFunc("/inspect", s.handler.Inspect)
 
-	log.Println("Serving work queue server to on the addr ", addr)
+	s.log.Info("Serving work queue server to on the addr ", addr)
 	s.errChan <- s.srv.ListenAndServe()
 
 	return <-s.errChan

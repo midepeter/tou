@@ -2,19 +2,21 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/midepeter/tou/cmd/tou"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	"github.com/midepeter/tou/logger"
 )
 
 func main() {
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	zerolog.SetGlobalLevel(zerolog.FatalLevel)
+	log, err := logger.SetUpLogger()
+	if err != nil {
+		panic(fmt.Sprintf("Error trying to set up logger %v", err))
+	}
 
+	log.Info("Hello we are here it is working!!!")
 	if err := tou.Run().Run(os.Args); err != nil {
-		log.Err(err).Msg("Exiting tou.....")
 		os.Exit(1)
 	}
 }
