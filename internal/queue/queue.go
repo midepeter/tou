@@ -1,66 +1,57 @@
 package queue
 
 import (
-	"fmt"
 	"sync"
+
+	"container/heap"
 
 	"github.com/midepeter/tou/internal/job"
 )
 
-type Store interface {
-	//Get() gets job from the queue
-	Get() job.Job
-
-	//Inserts Item in to the database
-	Insert(t job.Job) error
-
-	//Shutdown
-	Shutdown() error
-}
-
 type Queue struct {
-	mu       sync.Mutex
-	id       string
-	elem     []job.Job //
-	size     uint64    //Size signifies the size of jobs each queue can take
-	shutdown bool
+	mu   sync.Mutex
+	id   string
+	elem []job.Job //
 }
 
 func NewQueue(id string) *Queue {
-	return &Queue{
+
+	q := &Queue{
 		id:   id,
-		size: 10,
-		elem: make([]job.Job, 0),
+		elem: make([]job.Job, 10),
 	}
+
+	heap.Init(q)
+	return q
 }
 
-func (q *Queue) Get() job.Job {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-	job := q.elem[len(q.elem)-1]
-
-	if len(q.elem) > 0 {
-		q.elem = q.elem[1:]
-	}
-
-	return job
+func (q *Queue) Len() int {
+	return len(q.elem)
 }
 
-func (q *Queue) Insert(t job.Job) error {
-	q.mu.Lock()
-	defer q.mu.Unlock()
-	if len(q.elem) > int(q.size) {
-		return fmt.Errorf("Unable to add job to queue")
+func (q *Queue) Less(i, j int) bool {
+	if q.elem[i].PriorityIdx < q.elem[j].PriorityIdx {
+		return true
 	}
 
-	q.elem = append(q.elem, t)
-	return nil
+	return false
 }
 
-func (q *Queue) Shutdown() error {
-	if !q.shutdown {
-		q = nil
-	}
+func (q *Queue) Swap(i, j int) {
+	q.elem[i], q.elem[j] = q.elem[j], q.elem[i]
+}
 
-	return nil
+func (q *Queue) Push(x any) {
+	elem, ok := x.(job.Job)
+	if !ok {
+		panic("Unable to assert the type")
+	}
+	q.elem = append(q.elem, elem)
+}
+
+func (q *Queue) Pop() any {
+	popVal := q.elem[0]
+	q.elem = q.elem[1:]
+
+	return popVal
 }

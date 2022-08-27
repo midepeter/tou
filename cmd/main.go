@@ -15,6 +15,8 @@ func main() {
 		panic(fmt.Sprintf("Error trying to set up logger %v", err))
 	}
 
+	defer log.Sync()
+
 	log.Info("Hello we are here it is working!!!")
 	if err := tou.Run().Run(os.Args); err != nil {
 		os.Exit(1)

@@ -31,9 +31,7 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	if err := h.Queue.Insert(newJob); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-	}
+	h.Queue.Push(newJob)
 
 	w.Write(body)
 
