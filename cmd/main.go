@@ -17,7 +17,6 @@ func main() {
 
 	defer log.Sync()
 
-	log.Info("Hello we are here it is working!!!")
 	if err := tou.Run().Run(os.Args); err != nil {
 		os.Exit(1)
 	}

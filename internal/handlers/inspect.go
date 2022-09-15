@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -11,6 +10,7 @@ func (h *Handler) Inspect(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Write(body)
 
@@ -19,5 +19,5 @@ func (h *Handler) Inspect(w http.ResponseWriter, r *http.Request) {
 
 	job := h.Queue.Pop()
 
-	log.Printf("Inspection: the %#v ", job)
+	h.Log.Info("Inspection: the %v ", job)
 }

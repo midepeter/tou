@@ -35,6 +35,8 @@ func (s *Server) Serve(addr string) error {
 
 	http.HandleFunc("/inspect", s.handler.Inspect)
 
+	http.HandleFunc("/listen".s.handler.Listen)
+
 	s.log.Info("Serving work queue server to on the addr ", addr)
 	s.errChan <- s.srv.ListenAndServe()
 

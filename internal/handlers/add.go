@@ -27,7 +27,7 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
-	if err := newJob.Validate(); err != nil {
+	if !newJob.Valid() {
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
@@ -35,5 +35,5 @@ func (h *Handler) Add(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(body)
 
-	h.Log.Info("Adding a new job %#v", newJob)
+	h.Log.Info("Adding a new job %v", newJob)
 }
